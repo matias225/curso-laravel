@@ -41,7 +41,7 @@ class UsersModuleTest extends TestCase
             'name' => 'Matias Romani'
         ]);
 
-        $this->get('/usuarios/'.$user->id)
+        $this->get("/usuarios/{$user->id}")
         ->assertStatus(200)
         ->assertSee('Matias Romani');
     }
@@ -63,8 +63,6 @@ class UsersModuleTest extends TestCase
     /** @test */
     function itCreatesANewUser()
     {
-        $this->withoutExceptionHandling();
-
         $this->post('/usuarios/', [
             'name' => 'Matias',
             'email' => 'mati@mati.com',
@@ -85,7 +83,7 @@ class UsersModuleTest extends TestCase
             ->post('/usuarios/', [
             'name' => '',
             'email' => 'mati@mati.com',
-            'password' => '1234'
+            'password' => '123456'
         ])
         ->assertRedirect('usuarios/nuevo')
         ->assertSessionHasErrors([
@@ -107,7 +105,7 @@ class UsersModuleTest extends TestCase
             ->post('/usuarios/', [
             'name' => 'Matias',
             'email' => '',
-            'password' => '1234'
+            'password' => '123456'
         ])
             ->assertRedirect('usuarios/nuevo')
             ->assertSessionHasErrors([
@@ -158,7 +156,7 @@ class UsersModuleTest extends TestCase
             ->post('/usuarios/', [
             'name' => 'Matias',
             'email' => 'correo-no-valido',
-            'password' => '1234'
+            'password' => '123456'
         ])
             ->assertRedirect('usuarios/nuevo')
             ->assertSessionHasErrors([
@@ -179,8 +177,153 @@ class UsersModuleTest extends TestCase
             ->post('/usuarios/', [
             'name' => 'Matias',
             'email' => 'mati@mati.com',
-            'password' => '1234'
+            'password' => '123456'
         ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors([
+                'email' => 'The email has already been taken.'
+            ]);
+
+        $this::assertEquals(1, User::count());
+    }
+
+    /** @test */
+    function itLoadsTheEditUsersPage()
+    {
+        $user = factory(User::class)->create();
+
+        $this->get("/usuarios/{$user->id}/editar")
+            ->assertStatus(200)
+            ->assertViewIs('users.edit')
+            ->assertSee("Editando al usuario")
+            ->assertViewHas('user', function ($viewUser) use ($user) {
+                return $viewUser->id == $user->id;
+            });
+    }
+
+    /** @test */
+    function itUpdatesAUser()
+    {
+        $user = factory(User::class)->create();
+
+        $this->withoutExceptionHandling();
+
+        $this->put("/usuarios/{$user->id}", [
+            'name' => 'Matias',
+            'email' => 'mati@mati.com',
+            'password' => '123456'
+        ])->assertRedirect("/usuarios/{$user->id}");
+
+        $this->assertCredentials([
+            'name' => 'Matias',
+            'email' => 'mati@mati.com',
+            'password' => '123456'
+        ]);
+    }
+
+    /** @test */
+    function theNameIsRequiredWhenUpdatingTheUser()
+    {
+        $user = factory(User::class)->create();
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => '',
+                'email' => 'mati@mati.com',
+                'password' => '123456'
+            ])
+            ->assertRedirect("usuarios/{$user->id}/editar")
+            ->assertSessionHasErrors([
+                'name' => 'The name field is required.'
+            ]);
+
+        $this::assertDatabaseMissing('users', ['email' => 'mati@mati.com']);
+    }
+
+    /** @test
+    function theEmailIsRequiredWhenUpdatingTheUser()
+    {
+        $this->withoutExceptionHandling();
+        $user = factory(User::class)->create();
+
+        $this->from("usuarios/{$user->id}/editar")
+            ->put("usuarios/{$user->id}", [
+                'name' => 'Matias',
+                'email' => '',
+                'password' => '123456'
+            ])
+            ->assertRedirect("usuarios/{$user->id}/editar")
+            ->assertSessionHasErrors([
+                'email' => 'The email field is required.'
+            ]);
+
+        $this::assertDatabaseMissing('users', ['name' => 'Matias']);
+    }*/
+
+    /** @test */
+    function theEmailMustBeValidWhenUpdatingTheUser()
+    {
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Matias',
+                'email' => 'correo-no-valido',
+                'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors([
+                'email' => 'The email must be a valid email address.'
+            ]);
+
+        $this::assertEquals(0, User::count());
+    }
+
+    /** @test */
+    function thePasswordIsRequiredWhenUpdatingTheUser()
+    {
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Matias',
+                'email' => 'mati@mati.com',
+                'password' => ''
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors([
+                'password' => 'The password field is required.'
+            ]);
+
+        $this::assertEquals(0, User::count());
+    }
+
+    /** @test */
+    function thePasswordMustBe6CharactersWhenUpdatingTheUser()
+    {
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Matias',
+                'email' => 'mati@mati.com',
+                'password' => '1234'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors([
+                'password' => 'The password must be at least 6 characters.'
+            ]);
+
+        $this::assertEquals(0, User::count());
+    }
+
+    /** @test */
+    function theEmailMustBeUniqueWhenUpdatingTheUser()
+    {
+        factory(User::class)->create([
+            'email' => 'mati@mati.com'
+        ]);
+
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/', [
+                'name' => 'Matias',
+                'email' => 'mati@mati.com',
+                'password' => '123456'
+            ])
             ->assertRedirect('usuarios/nuevo')
             ->assertSessionHasErrors([
                 'email' => 'The email has already been taken.'

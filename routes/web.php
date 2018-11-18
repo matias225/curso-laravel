@@ -18,5 +18,7 @@ Route::get('/usuarios/{user}', 'UserController@show')
     ->where('user', '\d+')
     ->name('users.show');
 
-Route::get('/usuarios/{id}/edit', 'UserController@edit')
+Route::put('/usuarios/{user}', 'UserController@update');
+
+Route::get('/usuarios/{user}/editar', 'UserController@edit')
     ->where('id', '\d+');

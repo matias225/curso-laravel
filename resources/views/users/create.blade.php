@@ -24,7 +24,7 @@
                 <input class="form-control" type="text" name="name" id="name" placeholder="Matias Romani" value="{{ old('name') }}">
             </div>
             @if ($errors->has('name'))
-                <p>{{ $errors->first('name') }}</p>
+                <p class="alert alert-danger">{{ $errors->first('name') }}</p>
             @endif
 
             <div class="form-group">
@@ -32,7 +32,7 @@
                 <input class="form-control" type="email" name="email" id="email" placeholder="matias@example.com" value="{{ old('email') }}">
             </div>
             @if ($errors->has('email'))
-                <p>{{ $errors->first('email') }}</p>
+                <p class="alert alert-danger">{{ $errors->first('email') }}</p>
             @endif
 
             <div class="form-group">
@@ -40,7 +40,7 @@
                 <input class="form-control" type="password" name="password" id="password" placeholder="6 o más caracteres" >
             </div>
             @if ($errors->has('password'))
-                <p>{{ $errors->first('password') }}</p>
+                <p class="alert alert-danger">{{ $errors->first('password') }}</p>
             @endif
 
             <button class="btn btn-success" type="submit">Crear usuario</button>

@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-    public function index() {
-
+    public function index()
+    {
         // Con Eloquent
         $users = User::all();
         
@@ -38,16 +38,11 @@ class UserController extends Controller
         return view('users.index', compact('title', 'users'));
     }
 
-    public function show(User $user) {
+    public function show(User $user)
+    {
         // $user = User::findOrFail($id);
         return view('users.show', compact('user'));
         //return "Mostrando detalle del usuario: {$id}";
-    }
-
-    public function edit($id) {
-        $title = 'Editando al usuario: ';
-        return view('users.edit', compact('title','id'));
-        // return "Editando el usuario: {$id}";
     }
 
     public function create() {
@@ -69,5 +64,22 @@ class UserController extends Controller
             'password' => bcrypt($data['password'])
         ]);
         return redirect()->route('users');
+    }
+
+    public function edit(User $user)
+    {
+        return view('users.edit', ['user' => $user]);
+    }
+
+    public function update(User $user)
+    {
+        $data = request()->validate([
+            'name' => 'required',
+            'email' => '',
+            'password' => ''
+        ]);
+        $data['password'] = bcrypt($data['password']);
+        $user->update($data);
+        return redirect()->route('users.show', ['user' => $user]);
     }
 }
