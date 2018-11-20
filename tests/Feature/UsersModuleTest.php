@@ -14,18 +14,13 @@ class UsersModuleTest extends TestCase
     function itShowsTheUsersList() {
 
         factory(User::class)->create([
-            'name' => 'Rocio',
-        ]);
-
-        factory(User::class)->create([
             'name' => 'Joel',
         ]);
 
         $this->get('/usuarios')
         ->assertStatus(200)
         ->assertSee('Listado de usuarios')
-        ->assertSee('Joel')
-        ->assertSee('Rocio');
+        ->assertSee('Joel');
     }
    
     /** @test */
@@ -348,6 +343,19 @@ class UsersModuleTest extends TestCase
         $this->assertDatabaseHas('users', [
             'name' => 'Matias Romani 2',
             'email' => 'mati@mati.com',
+        ]);
+    }
+
+    /** @test */
+    function itDeletesAUser()
+    {
+        $user = factory(User::class)->create();
+
+        $this->delete("usuarios/{$user->id}")
+            ->assertRedirect('usuarios');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id
         ]);
     }
 }

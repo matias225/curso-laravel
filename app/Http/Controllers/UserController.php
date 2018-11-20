@@ -64,7 +64,7 @@ class UserController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password'])
         ]);
-        return redirect()->route('users');
+        return redirect()->route('users.index');
     }
 
     public function edit(User $user)
@@ -88,5 +88,11 @@ class UserController extends Controller
 
         $user->update($data);
         return redirect()->route('users.show', ['user' => $user]);
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return redirect()->route('users.index');
     }
 }

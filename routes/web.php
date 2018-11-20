@@ -7,7 +7,7 @@ Route::get('/saludo/{name}/{nickname}', 'WelcomeUserController@greetingWithNickn
 Route::get('/saludo/{name}', 'WelcomeUserController@greetingWithoutNickname');
 
 Route::get('/usuarios', 'UserController@index')
-    ->name('users');
+    ->name('users.index');
 
 Route::get('/usuarios/nuevo', 'UserController@create')
     ->name('users.create');
@@ -21,4 +21,7 @@ Route::get('/usuarios/{user}', 'UserController@show')
 Route::put('/usuarios/{user}', 'UserController@update');
 
 Route::get('/usuarios/{user}/editar', 'UserController@edit')
-    ->where('id', '\d+');
+    ->where('id', '\d+')->name('users.edit');
+
+Route::delete('/usuarios/{user}', 'UserController@destroy')
+    ->name('users.destroy');
